@@ -1,6 +1,7 @@
 package com.example.llcgs.android_rx.rxbinding;
 
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -17,6 +18,7 @@ import android.widget.ViewSwitcher;
 import com.example.llcgs.android_rx.R;
 import com.example.llcgs.android_rx.rxbus.RxBus;
 import com.example.llcgs.android_rx.rxbus.event.UserEvent;
+import com.example.llcgs.android_rx.rxjava.ThirdActivity;
 import com.jakewharton.rxbinding2.support.design.widget.RxTextInputLayout;
 import com.jakewharton.rxbinding2.widget.RxTextSwitcher;
 
@@ -87,7 +89,10 @@ public class SecondActivity extends AppCompatActivity implements ViewSwitcher.Vi
                             UserEvent mcGrady = new UserEvent("McGrady", "32");
                             RxBus.getInstance().post(mcGrady);
                             Log.d("MainActivity", "userEvent:" + mcGrady.getName() + "," + mcGrady.getPwd());
-                            SecondActivity.this.finish();
+                            if (aLong == 2){
+                                startActivity(new Intent(SecondActivity.this, ThirdActivity.class));
+                            }
+                            //SecondActivity.this.finish();
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

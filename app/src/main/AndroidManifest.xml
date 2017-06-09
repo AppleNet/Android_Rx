@@ -20,6 +20,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".rxbinding.SecondActivity"/>
+        <activity android:name=".rxjava.ThirdActivity"/>
     </application>
 
 </manifest>
