@@ -13,6 +13,8 @@ import com.example.llcgs.android_rx.rxbinding.MyObserver;
 import com.jakewharton.rxbinding2.view.RxView;
 import com.jakewharton.rxbinding2.widget.RxTextView;
 
+import java.util.concurrent.TimeUnit;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -34,12 +36,42 @@ public class ThirdActivity extends AppCompatActivity {
     private String memoryCache = "memory";
 
     private TextView textview;
+    private TextView textPeriod;
+    private int currentIndex;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_third);
         textview = (TextView) findViewById(R.id.textView2);
+        textPeriod = (TextView) findViewById(R.id.textView3);
+
+        /***
+         *  使用schedulePeriodically做轮询请求
+         *
+         * */
+        Observable.create(new ObservableOnSubscribe<String>() {
+            @Override
+            public void subscribe(@NonNull final ObservableEmitter<String> e) throws Exception {
+                Schedulers.newThread().createWorker()
+                        .schedulePeriodically(new Runnable() {
+                            @Override
+                            public void run() {
+                                currentIndex ++ ;
+                                e.onNext(String.valueOf(currentIndex));
+                            }
+                        }, 5, 3, TimeUnit.SECONDS);
+            }
+        }).subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Consumer<String>() {
+            @Override
+            public void accept(@NonNull String s) throws Exception {
+                RxTextView.text(textPeriod).accept(s);
+            }
+        });
+
+
 
         Observable<String> memory = Observable.create(new ObservableOnSubscribe<String>() {
             @Override

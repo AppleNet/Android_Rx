@@ -11,4 +11,12 @@
         android:gravity="center"
         android:textColor="@color/colorPrimary"
         android:text="TextView"/>
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:textColor="@color/colorAccent"
+        android:text="TextView"/>
 </LinearLayout>
