@@ -21,6 +21,7 @@
         </activity>
         <activity android:name=".rxbinding.SecondActivity"/>
         <activity android:name=".rxjava.ThirdActivity"/>
+        <activity android:name=".rxjava.FourActivity"/>
     </application>
 
 </manifest>

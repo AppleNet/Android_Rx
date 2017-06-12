@@ -1,5 +1,6 @@
 package com.example.llcgs.android_rx.rxjava;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -45,6 +46,14 @@ public class ThirdActivity extends AppCompatActivity {
         setContentView(R.layout.activity_third);
         textview = (TextView) findViewById(R.id.textView2);
         textPeriod = (TextView) findViewById(R.id.textView3);
+
+        RxView.clicks(textview).subscribe(new Consumer<Object>() {
+            @Override
+            public void accept(@NonNull Object o) throws Exception {
+                startActivity(new Intent(ThirdActivity.this, FourActivity.class));
+            }
+        });
+
 
         /***
          *  使用schedulePeriodically做轮询请求
