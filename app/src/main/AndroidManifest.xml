@@ -23,6 +23,7 @@
         <activity android:name=".rxjava.ThirdActivity"/>
         <activity android:name=".rxjava.FourActivity"/>
         <activity android:name=".rxjava.FiveActivity"/>
+        <activity android:name=".rxjava.SixActivity"/>
     </application>
 
 </manifest>
