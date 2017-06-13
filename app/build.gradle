@@ -1,14 +1,13 @@
 apply plugin: 'com.android.application'
-
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
     defaultConfig {
         applicationId "com.example.llcgs.android_rx"
-        minSdkVersion 17
-        targetSdkVersion 25
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -21,21 +20,27 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
+    testCompile 'junit:junit:4.12'
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.android.support:design:25.3.1'
-    testCompile 'junit:junit:4.12'
+    compile rootProject.ext.appcompat
+    compile rootProject.ext.constraint_layout
+    compile rootProject.ext.design
     // ---Rx---
-    compile 'com.jakewharton.rxbinding2:rxbinding:2.0.0'
-    compile 'com.jakewharton.rxbinding2:rxbinding-support-v4:2.0.0'
-    compile 'com.jakewharton.rxbinding2:rxbinding-appcompat-v7:2.0.0'
-    compile 'com.jakewharton.rxbinding2:rxbinding-design:2.0.0'
-    compile 'com.jakewharton.rxbinding2:rxbinding-recyclerview-v7:2.0.0'
-    compile 'com.jakewharton.rxbinding2:rxbinding-leanback-v17:2.0.0'
-    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
-    compile 'io.reactivex.rxjava2:rxjava:2.1.0'
-    compile 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.18'
+    compile rootProject.ext.rxbinding
+    compile rootProject.ext.rxbinding_support_v4
+    compile rootProject.ext.rxbinding_appcompat_v7
+    compile rootProject.ext.rxbinding_design
+    compile rootProject.ext.rxbinding_recyclerview_v7
+    compile rootProject.ext.rxbinding_leanback_v17
+    compile rootProject.ext.rxAndroid
+    compile rootProject.ext.rxJava
+    compile rootProject.ext.qucikAdapter
+
+    /*rxlifecycle2*/
+    compile rootProject.ext.rxlifecycle
+    /*rxlifecycle2  If you want to bind to Android-specific lifecycles*/
+    compile rootProject.ext.rxlifecycle_android
+    compile rootProject.ext.findbugs
 }

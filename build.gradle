@@ -3,11 +3,12 @@
 buildscript {
     repositories {
         jcenter()
+        mavenCentral()
         maven { url "https://jitpack.io" }
+        maven { url "https://maven.google.com" }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.1'
-
+        classpath 'com.android.tools.build:gradle:2.3.2'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -16,10 +17,41 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
+        mavenCentral()
         maven { url "https://jitpack.io" }
+        maven { url "https://maven.google.com" }
     }
+}
+
+ext {
+    compileSdkVersion = 25
+    buildToolsVersion = "25.0.3"
+    minSdkVersion = 17
+    targetSdkVersion = 25
+    supportVersionName = "25.3.1"
+    versionCode = 1
+    versionName = "1.0"
+
+    // compile
+    appcompat = 'com.android.support:appcompat-v7:25.3.1'
+    constraint_layout = 'com.android.support.constraint:constraint-layout:1.0.2'
+    design = 'com.android.support:design:25.3.1'
+    // Rx
+    rxbinding = 'com.jakewharton.rxbinding2:rxbinding:2.0.0'
+    rxbinding_support_v4 = 'com.jakewharton.rxbinding2:rxbinding-support-v4:2.0.0'
+    rxbinding_appcompat_v7 = 'com.jakewharton.rxbinding2:rxbinding-appcompat-v7:2.0.0'
+    rxbinding_design = 'com.jakewharton.rxbinding2:rxbinding-design:2.0.0'
+    rxbinding_recyclerview_v7 = 'com.jakewharton.rxbinding2:rxbinding-recyclerview-v7:2.0.0'
+    rxbinding_leanback_v17 = 'com.jakewharton.rxbinding2:rxbinding-leanback-v17:2.0.0'
+    rxAndroid = 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    rxJava = 'io.reactivex.rxjava2:rxjava:2.1.0'
+    qucikAdapter = 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.18'
+    rxlifecycle = 'com.trello.rxlifecycle2:rxlifecycle:2.1.0'
+    rxlifecycle_android = 'com.trello.rxlifecycle2:rxlifecycle-android:2.1.0'
+    findbugs = 'com.google.code.findbugs:jsr305:2.0.1'
 }
 
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+

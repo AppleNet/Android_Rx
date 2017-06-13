@@ -3,13 +3,13 @@ package com.example.llcgs.android_rx.rxjava;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.llcgs.android_rx.R;
+import com.example.llcgs.android_rx.rxlifecycle.BaseActivity;
 import com.example.llcgs.android_rx.rxbinding.MyObserver;
 import com.jakewharton.rxbinding2.view.RxView;
 import com.jakewharton.rxbinding2.widget.RxTextView;
@@ -32,7 +32,7 @@ import io.reactivex.schedulers.Schedulers;
  */
 
 
-public class ThirdActivity extends AppCompatActivity {
+public class ThirdActivity extends BaseActivity {
 
     private String memoryCache = "memory";
 

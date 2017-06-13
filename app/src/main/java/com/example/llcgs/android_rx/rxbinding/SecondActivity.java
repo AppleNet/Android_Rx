@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -16,6 +15,7 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.example.llcgs.android_rx.R;
+import com.example.llcgs.android_rx.rxlifecycle.BaseActivity;
 import com.example.llcgs.android_rx.rxbus.RxBus;
 import com.example.llcgs.android_rx.rxbus.event.UserEvent;
 import com.example.llcgs.android_rx.rxjava.ThirdActivity;
@@ -36,7 +36,7 @@ import io.reactivex.schedulers.Schedulers;
  */
 
 
-public class SecondActivity extends AppCompatActivity implements ViewSwitcher.ViewFactory {
+public class SecondActivity extends BaseActivity implements ViewSwitcher.ViewFactory {
 
     private TextSwitcher textSwitcher;
     final String[] array = new String[]{"wade","jodn","james"};
