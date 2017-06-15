@@ -12,6 +12,7 @@ public class UserEvent {
 
     private String name;
     private String pwd;
+    private String[] array;
 
     public String getName() {
         return name;
@@ -27,6 +28,14 @@ public class UserEvent {
 
     public void setPwd(String pwd) {
         this.pwd = pwd;
+    }
+
+    public String[] getArray() {
+        return array;
+    }
+
+    public void setArray(String[] array) {
+        this.array = array;
     }
 
     public UserEvent(String name, String pwd) {

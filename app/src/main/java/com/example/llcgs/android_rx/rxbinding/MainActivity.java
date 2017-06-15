@@ -33,6 +33,14 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
+
+/**
+ *  RxJava与RxAndroid的区别在于 RxAndroid增加了主线程回调
+ *  通过额外封装的AndroidSchedulers 和 HandlerScheduler extends Scheduler
+ *    HandlerScheduler中封装了handler 通过handler发送消息给主线程，
+ *    实现了Android的设计原理，子线程发消息通知主线程更新UI
+ * */
+
 public class MainActivity extends BaseActivity {
 
     private Button button;

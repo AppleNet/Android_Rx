@@ -8,7 +8,7 @@ buildscript {
         maven { url "https://maven.google.com" }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.2'
+        classpath 'com.android.tools.build:gradle:2.3.3'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -48,7 +48,11 @@ ext {
     qucikAdapter = 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.18'
     rxlifecycle = 'com.trello.rxlifecycle2:rxlifecycle:2.1.0'
     rxlifecycle_android = 'com.trello.rxlifecycle2:rxlifecycle-android:2.1.0'
-    findbugs = 'com.google.code.findbugs:jsr305:2.0.1'
+    findbugs = 'com.google.code.findbugs:jsr305:3.0.1'
+    dagger = 'com.google.dagger:dagger:2.11'
+    annotationProcessor = 'com.google.dagger:dagger-compiler:2.11'
+    gridlayout_v7 = 'com.android.support:gridlayout-v7:25.3.1'
+
 }
 
 task clean(type: Delete) {

@@ -10,6 +10,8 @@ import android.widget.Toast;
 
 import com.example.llcgs.android_rx.R;
 import com.example.llcgs.android_rx.bean.User;
+import com.example.llcgs.android_rx.rxbus.RxBus;
+import com.example.llcgs.android_rx.rxbus.event.UserEvent;
 import com.example.llcgs.android_rx.rxlifecycle.ActivityLifeCycleEvent;
 import com.example.llcgs.android_rx.rxlifecycle.BaseActivity;
 import com.jakewharton.rxbinding2.view.RxView;
@@ -73,6 +75,9 @@ public class FiveActivity extends BaseActivity {
             @Override
             public void accept(@NonNull Object o) throws Exception {
                 startActivity(new Intent(FiveActivity.this, SixActivity.class));
+                UserEvent event = new UserEvent();
+                event.setArray(nbaArray);
+                RxBus.getInstance().post(event);
             }
         });
 
@@ -97,7 +102,7 @@ public class FiveActivity extends BaseActivity {
         Observable.fromArray(nbaArray)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .debounce(1, TimeUnit.SECONDS)
+                .debounce(5, TimeUnit.SECONDS)
                 .doOnSubscribe(new Consumer<Disposable>() {
                     @Override
                     public void accept(@NonNull Disposable disposable) throws Exception {
@@ -108,7 +113,8 @@ public class FiveActivity extends BaseActivity {
                 .subscribe(new Consumer<Object>() {
                     @Override
                     public void accept(@NonNull Object s) throws Exception {
-
+                        Toast.makeText(FiveActivity.this, "s:"+s, Toast.LENGTH_SHORT).show();
+                        RxTextView.text(editText).accept(s+"");
                     }
                 });
 

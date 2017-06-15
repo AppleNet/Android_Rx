@@ -16,6 +16,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    configurations.all {
+        resolutionStrategy.force 'com.google.code.findbugs:jsr305:1.3.9'
+    }
 }
 
 dependencies {
@@ -43,4 +46,7 @@ dependencies {
     /*rxlifecycle2  If you want to bind to Android-specific lifecycles*/
     compile rootProject.ext.rxlifecycle_android
     compile rootProject.ext.findbugs
+    compile rootProject.ext.dagger
+    compile rootProject.ext.annotationProcessor
+    compile rootProject.ext.gridlayout_v7
 }

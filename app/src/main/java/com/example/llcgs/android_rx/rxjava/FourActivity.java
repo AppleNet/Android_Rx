@@ -73,9 +73,9 @@ public class FourActivity extends BaseActivity {
         recyclerView.setHasFixedSize(true);
         adapter.addData(list);
         recyclerView.setAdapter(adapter);
-        adapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
+        adapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
-            public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
+            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
                 startActivity(new Intent(FourActivity.this, FiveActivity.class));
             }
         });
@@ -99,7 +99,7 @@ public class FourActivity extends BaseActivity {
                 .map(new Function<Object, Object>() {
                     @Override
                     public Object apply(@NonNull Object o) throws Exception {
-                        return null;
+                        return o;
                     }
                 }).subscribe(new Consumer<Object>() {
                     @Override
@@ -141,6 +141,13 @@ public class FourActivity extends BaseActivity {
          *  如果任何一个通过这个 flatMap  操作产生的单独的Observable调用 onError  异常终止了，这个Observable自身会立即调用 onError  并终止
          *
          *  通过ObservableSource 可以切换到不同的线程中执行这些操作。这样就会产生无序发放的情况
+         *
+         *   flatMap() 和 map() 有一个相同点：它也是把传入的参数转化之后返回另一个对象。但需要注意，和 map() 不同的是， flatMap() 中返回的是个 Observable 对象，并且这个 Observable 对象并不是被直接发送到了 Subscriber 的回调方法中。
+         *   flatMap() 的原理是这样的：
+         *      1. 使用传入的事件对象创建一个 Observable 对象；
+         *      2. 并不发送这个 Observable, 而是将它激活，于是它开始发送事件；
+         *      3. 每一个创建出来的 Observable 发送的事件，都被汇入同一个 Observable ，而这个 Observable 负责将这些事件统一交给 Subscriber 的回调方法
+         *
          * */
         Observable.fromArray(nbaArray)
                 .subscribeOn(Schedulers.io())
