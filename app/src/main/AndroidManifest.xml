@@ -24,6 +24,7 @@
         <activity android:name=".rxjava.FourActivity"/>
         <activity android:name=".rxjava.FiveActivity"/>
         <activity android:name=".rxjava.SixActivity"/>
+        <activity android:name=".rxjava.SevenActivity"/>
     </application>
 
 </manifest>
