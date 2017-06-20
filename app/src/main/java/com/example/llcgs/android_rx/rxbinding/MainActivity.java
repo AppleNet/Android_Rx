@@ -15,9 +15,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.llcgs.android_rx.R;
-import com.example.llcgs.android_rx.rxlifecycle.BaseActivity;
 import com.example.llcgs.android_rx.rxbus.RxBus;
 import com.example.llcgs.android_rx.rxbus.event.UserEvent;
+import com.example.llcgs.android_rx.rxjava.EightActivity;
+import com.example.llcgs.android_rx.rxlifecycle.BaseActivity;
 import com.jakewharton.rxbinding2.view.RxView;
 import com.jakewharton.rxbinding2.widget.RxCompoundButton;
 import com.jakewharton.rxbinding2.widget.RxTextView;
@@ -173,7 +174,9 @@ public class MainActivity extends BaseActivity {
             public void onNext(@NonNull Boolean aBoolean) {
                 Log.d("MainActivity", "aBoolean: "+aBoolean);
                 if(aBoolean){
-                    Intent intent = new Intent(MainActivity.this, SecondActivity.class);
+                    //Intent intent = new Intent(MainActivity.this, SecondActivity.class);
+                    //Intent intent = new Intent(MainActivity.this, SevenActivity.class);
+                    Intent intent = new Intent(MainActivity.this, EightActivity.class);
                     startActivity(intent);
                 }
             }

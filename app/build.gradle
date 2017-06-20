@@ -47,6 +47,6 @@ dependencies {
     compile rootProject.ext.rxlifecycle_android
     compile rootProject.ext.findbugs
     compile rootProject.ext.dagger
-    compile rootProject.ext.annotationProcessor
+    annotationProcessor rootProject.ext.annotationProcessor
     compile rootProject.ext.gridlayout_v7
 }
