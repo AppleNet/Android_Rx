@@ -10,6 +10,12 @@ import com.example.llcgs.android_rx.rxlifecycle.ActivityLifeCycleEvent;
 import com.example.llcgs.android_rx.rxlifecycle.BaseActivity;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -254,9 +260,112 @@ public class EightActivity extends BaseActivity {
 
         /**
          * to
+         *  --toList
          *   将Observable转换为另一个对象或数据结构
          * */
+        Observable.fromArray(nbaArray)
+                // 将数组转换成List
+                .toList()
+                .observeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .map(new Function<List<String>, Map<Integer, String>>() {
+                    @Override
+                    public Map<Integer, String> apply(@NonNull List<String> strings) throws Exception {
+                        Map<Integer, String> items = new HashMap<>();
+                        for (String s : strings){
+                            items.put(Arrays.asList(nbaArray).indexOf(s), "NBA All-Star:" + s);
+                        }
+                        return items;
+                    }
+                }).subscribe(new Consumer<Map<Integer, String>>() {
+            @Override
+            public void accept(@NonNull Map<Integer, String> integerStringMap) throws Exception {
 
+                Set<Integer> integers = integerStringMap.keySet();
+                for (Integer integer : integers){
+                    Log.d(TAG, "toList-integerStringMap.keySet(): "+ integerStringMap.get(integer));
+                }
+
+                Set<Map.Entry<Integer, String>> entries = integerStringMap.entrySet();
+                Iterator<Map.Entry<Integer, String>> iterator = entries.iterator();
+                while (iterator.hasNext()){
+                    Map.Entry<Integer, String> next = iterator.next();
+                    Log.d(TAG, "toList-integerStringMap.entrySet(): " + next.getKey()+ "," + next.getValue());
+                }
+
+                for (String s : integerStringMap.values()){
+                    Log.d(TAG, "toList: " + s);
+                }
+            }
+        });
+
+        /**
+         * to
+         *  --getIterator
+         *  getIterator  操作符只能用于 BlockingObservable  的子类，要使用它，你首先必须把原始的Observable转换为一个 BlockingObservable
+         *
+         * */
+        Observable.fromArray(nbaArray).blockingIterable();
+
+        /**
+         * to
+         *  --toMap 收集原始Observable发射的所有数据项到一个Map（默认是HashMap）然后发射这个Map。你可以提供一个用于生成Map的Key的函数，还可以提供一个函数转换数据项到Map存储的value值
+         *
+         * */
+        Observable.fromArray(nbaArray)
+                .toMap(/**生成key函数*/new Function<String, Integer>() {
+                    @Override
+                    public Integer apply(@NonNull String s) throws Exception {
+                        return Arrays.asList(nbaArray).indexOf(s);
+                    }
+                }, /**生成value函数*/new Function<String, String>() {
+                    @Override
+                    public String apply(@NonNull String s) throws Exception {
+                        return "NBA All-Star: "+s;
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Map<Integer, String>>() {
+            @Override
+            public void accept(@NonNull Map<Integer, String> integerStringMap) throws Exception {
+                for (String s : integerStringMap.values()){
+                    Log.d(TAG, "toList: " + s);
+                }
+            }
+        });
+
+        /**
+         * to
+         *  --toMultiMap 类似于 toMap  ，不同的是，它生成的这个Map同时还是一个 ArrayList
+         * */
+        Observable.fromArray(nbaArray)
+                .toMultimap(new Function<String, Integer>() {
+                    @Override
+                    public Integer apply(@NonNull String s) throws Exception {
+                        return null;
+                    }
+                }, new Function<String, String>() {
+                    @Override
+                    public String apply(@NonNull String s) throws Exception {
+                        return null;
+                    }
+                }, new Callable<Map<Integer, Collection<String>>>() {
+                    @Override
+                    public Map<Integer, Collection<String>> call() throws Exception {
+                        return null;
+                    }
+                }, new Function<Integer, Collection<? super String>>() {
+                    @Override
+                    public Collection<? super String> apply(@NonNull Integer integer) throws Exception {
+                        return null;
+                    }
+                }).subscribe(new Consumer<Map<Integer, Collection<String>>>() {
+            @Override
+            public void accept(@NonNull Map<Integer, Collection<String>> integerCollectionMap) throws Exception {
+
+            }
+        });
 
     }
 }
