@@ -26,6 +26,7 @@
         <activity android:name=".rxjava.SixActivity"/>
         <activity android:name=".rxjava.SevenActivity"/>
         <activity android:name=".rxjava.EightActivity"/>
+        <activity android:name=".rxjava.NineActivity"/>
     </application>
 
 </manifest>

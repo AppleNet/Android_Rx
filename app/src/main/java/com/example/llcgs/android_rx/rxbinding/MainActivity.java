@@ -17,7 +17,7 @@ import android.widget.Toast;
 import com.example.llcgs.android_rx.R;
 import com.example.llcgs.android_rx.rxbus.RxBus;
 import com.example.llcgs.android_rx.rxbus.event.UserEvent;
-import com.example.llcgs.android_rx.rxjava.EightActivity;
+import com.example.llcgs.android_rx.rxjava.NineActivity;
 import com.example.llcgs.android_rx.rxlifecycle.BaseActivity;
 import com.jakewharton.rxbinding2.view.RxView;
 import com.jakewharton.rxbinding2.widget.RxCompoundButton;
@@ -176,7 +176,8 @@ public class MainActivity extends BaseActivity {
                 if(aBoolean){
                     //Intent intent = new Intent(MainActivity.this, SecondActivity.class);
                     //Intent intent = new Intent(MainActivity.this, SevenActivity.class);
-                    Intent intent = new Intent(MainActivity.this, EightActivity.class);
+                    //Intent intent = new Intent(MainActivity.this, EightActivity.class);
+                    Intent intent = new Intent(MainActivity.this, NineActivity.class);
                     startActivity(intent);
                 }
             }
