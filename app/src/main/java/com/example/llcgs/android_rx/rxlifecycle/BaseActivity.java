@@ -2,6 +2,7 @@ package com.example.llcgs.android_rx.rxlifecycle;
 
 import android.os.Bundle;
 import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
@@ -24,7 +25,7 @@ import io.reactivex.subjects.BehaviorSubject;
  */
 
 
-public class BaseActivity extends AppCompatActivity implements LifecycleProvider<LifeCycleEvent>{
+public class BaseActivity extends AppCompatActivity implements LifecycleProvider<LifeCycleEvent> {
 
     private CompositeDisposable compositeDisposable;
     protected final BehaviorSubject<LifeCycleEvent> lifecycleSubject = BehaviorSubject.create();
@@ -48,38 +49,30 @@ public class BaseActivity extends AppCompatActivity implements LifecycleProvider
 
     @Override
     protected void onResume() {
+        lifecycleSubject.onNext(ActivityLifeCycleEvent.RESUME);
         super.onResume();
-        if (lifecycleSubject != null) {
-            lifecycleSubject.onNext(ActivityLifeCycleEvent.RESUME);
-        }
     }
 
     @Override
     protected void onPause() {
+        lifecycleSubject.onNext(ActivityLifeCycleEvent.PAUSE);
         super.onPause();
-        if (lifecycleSubject != null) {
-            lifecycleSubject.onNext(ActivityLifeCycleEvent.PAUSE);
-        }
     }
 
     @Override
     protected void onStop() {
+        lifecycleSubject.onNext(ActivityLifeCycleEvent.STOP);
         super.onStop();
-        if (lifecycleSubject != null) {
-            lifecycleSubject.onNext(ActivityLifeCycleEvent.STOP);
-        }
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-        if (lifecycleSubject != null) {
-            lifecycleSubject.onNext(ActivityLifeCycleEvent.DESTROY);
-        }
+        lifecycleSubject.onNext(ActivityLifeCycleEvent.DESTROY);
         if (compositeDisposable != null) {
             compositeDisposable.clear();
             compositeDisposable = null;
         }
+        super.onDestroy();
     }
 
     @Nonnull
@@ -92,8 +85,8 @@ public class BaseActivity extends AppCompatActivity implements LifecycleProvider
     @Nonnull
     @Override
     @CheckResult
-    public <T> LifecycleTransformer<T> bindUntilEvent(LifeCycleEvent event) {
-        return RxLifecycle.bindUntilEvent(lifecycleSubject,event);
+    public <T> LifecycleTransformer<T> bindUntilEvent(@NonNull LifeCycleEvent event) {
+        return RxLifecycle.bindUntilEvent(lifecycleSubject, event);
     }
 
     @Nonnull

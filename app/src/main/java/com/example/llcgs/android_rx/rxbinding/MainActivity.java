@@ -18,6 +18,7 @@ import com.example.llcgs.android_rx.R;
 import com.example.llcgs.android_rx.rxbus.RxBus;
 import com.example.llcgs.android_rx.rxbus.event.UserEvent;
 import com.example.llcgs.android_rx.rxjava.NineActivity;
+import com.example.llcgs.android_rx.rxlifecycle.ActivityLifeCycleEvent;
 import com.example.llcgs.android_rx.rxlifecycle.BaseActivity;
 import com.jakewharton.rxbinding2.view.RxView;
 import com.jakewharton.rxbinding2.widget.RxCompoundButton;
@@ -29,6 +30,7 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
@@ -36,11 +38,11 @@ import io.reactivex.schedulers.Schedulers;
 
 
 /**
- *  RxJava与RxAndroid的区别在于 RxAndroid增加了主线程回调
- *  通过额外封装的AndroidSchedulers 和 HandlerScheduler extends Scheduler
- *    HandlerScheduler中封装了handler 通过handler发送消息给主线程，
- *    实现了Android的设计原理，子线程发消息通知主线程更新UI
- * */
+ * RxJava与RxAndroid的区别在于 RxAndroid增加了主线程回调
+ * 通过额外封装的AndroidSchedulers 和 HandlerScheduler extends Scheduler
+ * HandlerScheduler中封装了handler 通过handler发送消息给主线程，
+ * 实现了Android的设计原理，子线程发消息通知主线程更新UI
+ */
 
 public class MainActivity extends BaseActivity {
 
@@ -90,7 +92,7 @@ public class MainActivity extends BaseActivity {
                 .subscribe(new MyObserver<UserEvent>() {
                     @Override
                     public void onNext(@NonNull UserEvent userEvent) {
-                        Log.d("MainActivity", "userEvent:"+userEvent.getName() + "," + userEvent.getPwd());
+                        Log.d("MainActivity", "userEvent:" + userEvent.getName() + "," + userEvent.getPwd());
                         try {
                             RxTextView.text(editText).accept(userEvent.getName());
                             RxTextView.text(editText2).accept(userEvent.getPwd());
@@ -100,38 +102,56 @@ public class MainActivity extends BaseActivity {
                     }
                 });
 
-        RxView.clicks(button).throttleFirst(2, TimeUnit.SECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
+        RxView.clicks(button)
+                .throttleFirst(2, TimeUnit.SECONDS)
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
                 .doOnNext(new Consumer<Object>() {
                     @Override
                     public void accept(@NonNull Object o) throws Exception {
                         RxView.enabled(button).accept(false);
                     }
-                }).subscribe(new MyObserver<Object>() {
-            @Override
-            public void onNext(@NonNull Object o) {
-                Toast.makeText(MainActivity.this, "只能点击一次, 开始倒计时", Toast.LENGTH_SHORT).show();
-                Observable.interval(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
-                        .take(10)
-                        .subscribe(new MyObserver<Long>() {
-                            @Override
-                            public void onNext(@NonNull Long aLong) {
-                                try {
-                                    RxTextView.text(textView).accept("remian: " + (10 - aLong));
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
+                })
+                .compose(this.bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyObserver<Object>() {
+                    @Override
+                    public void onNext(@NonNull Object o) {
+                        Toast.makeText(MainActivity.this, "只能点击一次, 开始倒计时", Toast.LENGTH_SHORT).show();
+                        Observable.interval(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+                                .take(10)
+                                .subscribe(new MyObserver<Long>() {
+                                    @Override
+                                    public void onNext(@NonNull Long aLong) {
+                                        try {
+                                            RxTextView.text(textView).accept("remian: " + (10 - aLong));
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
 
-                            @Override
-                            public void onComplete() {
+                                    @Override
+                                    public void onComplete() {
 
-                            }
-                        });
-            }
-        });
+                                    }
+                                });
+                    }
+                });
 
         RxCompoundButton.checkedChanges(checkBox)
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .compose(this.<Boolean>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new MyObserver<Boolean>() {
                     @Override
@@ -145,6 +165,12 @@ public class MainActivity extends BaseActivity {
                 });
 
         RxTextView.textChanges(editText)
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
                 .flatMap(new Function<CharSequence, ObservableSource<String>>() {
                     @Override
                     public ObservableSource<String> apply(@NonNull CharSequence charSequence) throws Exception {
@@ -154,36 +180,59 @@ public class MainActivity extends BaseActivity {
                         }
                         return Observable.just(ch);
                     }
-                }).subscribe(new MyObserver<String>() {
-            @Override
-            public void onNext(@NonNull String s) {
-                textView.setText(s);
-            }
-        });
+                })
+                .compose(this.<String>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyObserver<String>() {
+                    @Override
+                    public void onNext(@NonNull String s) {
+                        textView.setText(s);
+                    }
+                });
 
         // 监听多个edittext
         Observable.combineLatest(RxTextView.textChanges(editText), RxTextView.textChanges(editText2), new BiFunction<CharSequence, CharSequence, Boolean>() {
             @Override
             public Boolean apply(@NonNull CharSequence name, @NonNull CharSequence password) throws Exception {
-                Log.d("MainActivity", "name:"+name.toString());
-                Log.d("MainActivity", "password:"+password.toString());
-                return (name.toString().equalsIgnoreCase("jdon") && password.toString().equalsIgnoreCase("123456"));
+                Log.d("MainActivity", "name:" + name.toString());
+                Log.d("MainActivity", "password:" + password.toString());
+                return (name.toString().equalsIgnoreCase("Jordon") && password.toString().equalsIgnoreCase("123456"));
             }
-        }).subscribe(new MyObserver<Boolean>() {
-            @Override
-            public void onNext(@NonNull Boolean aBoolean) {
-                Log.d("MainActivity", "aBoolean: "+aBoolean);
-                if(aBoolean){
-                    //Intent intent = new Intent(MainActivity.this, SecondActivity.class);
-                    //Intent intent = new Intent(MainActivity.this, SevenActivity.class);
-                    //Intent intent = new Intent(MainActivity.this, EightActivity.class);
-                    Intent intent = new Intent(MainActivity.this, NineActivity.class);
-                    startActivity(intent);
-                }
-            }
-        });
+        })
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .compose(this.<Boolean>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyObserver<Boolean>() {
+                    @Override
+                    public void onNext(@NonNull Boolean aBoolean) {
+                        Log.d("MainActivity", "aBoolean: " + aBoolean);
+                        if (aBoolean) {
+                            //Intent intent = new Intent(MainActivity.this, SecondActivity.class);
+                            //Intent intent = new Intent(MainActivity.this, SevenActivity.class);
+                            //Intent intent = new Intent(MainActivity.this, EightActivity.class);
+                            Intent intent = new Intent(MainActivity.this, NineActivity.class);
+                            startActivity(intent);
+                        }
+                    }
+                });
 
-        RxView.clicks(fab).subscribeOn(AndroidSchedulers.mainThread())
+        RxView.clicks(fab)
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .compose(bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new MyObserver<Object>() {
                     @Override
                     public void onNext(@NonNull Object o) {

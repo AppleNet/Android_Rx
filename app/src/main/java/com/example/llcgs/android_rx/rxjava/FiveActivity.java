@@ -18,6 +18,7 @@ import com.jakewharton.rxbinding2.view.RxView;
 import com.jakewharton.rxbinding2.widget.RxTextView;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -58,7 +59,7 @@ public class FiveActivity extends BaseActivity {
     };
 
     private ArrayList<String> list = new ArrayList<>();
-    private ArrayList userList = new ArrayList<>();
+    private List<User> userList = new ArrayList<>();
 
 
     private Button button;
@@ -95,7 +96,6 @@ public class FiveActivity extends BaseActivity {
         userList.add(new User("Kobe"));
         userList.add(new User("Kobe", "35"));
         userList.add(new User("35"));
-        userList.add(35);
 
         // debounce 仅在过了一段指定的时间还没发射数据时才发射一个数据
 
@@ -109,10 +109,10 @@ public class FiveActivity extends BaseActivity {
                         addDisposable(disposable);
                     }
                 })
-                .compose(bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
-                .subscribe(new Consumer<Object>() {
+                .compose(this.<String>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .subscribe(new Consumer<String>() {
                     @Override
-                    public void accept(@NonNull Object s) throws Exception {
+                    public void accept(@NonNull String s) throws Exception {
                         Toast.makeText(FiveActivity.this, "s:"+s, Toast.LENGTH_SHORT).show();
                         RxTextView.text(editText).accept(s+"");
                     }
@@ -129,16 +129,16 @@ public class FiveActivity extends BaseActivity {
                         addDisposable(disposable);
                     }
                 })
-                .compose(bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
-                .map(new Function<Object, Object>() {
+                .compose(this.<ArrayList<String>>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .map(new Function<ArrayList<String>, String>() {
                     @Override
-                    public Object apply(@NonNull Object o) throws Exception {
-                        return "name" + o +",";
+                    public String apply(@NonNull ArrayList<String> o) throws Exception {
+                        return "name" + o.size() +",";
                     }
                 })
-                .subscribe(new Consumer<Object>() {
+                .subscribe(new Consumer<String>() {
                     @Override
-                    public void accept(@NonNull Object o) throws Exception {
+                    public void accept(@NonNull String o) throws Exception {
                         RxTextView.text(editText).accept(editText.getText()+","+o);
                     }
                 });
@@ -148,22 +148,22 @@ public class FiveActivity extends BaseActivity {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .elementAt(2)
-                .compose(bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .compose(this.<String>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
                 .doOnSubscribe(new Consumer<Disposable>() {
                     @Override
                     public void accept(@NonNull Disposable disposable) throws Exception {
                         addDisposable(disposable);
                     }
                 })
-                .map(new Function<Object, Object>() {
+                .map(new Function<String, String>() {
                     @Override
-                    public Object apply(@NonNull Object o) throws Exception {
+                    public String apply(@NonNull String o) throws Exception {
                         return "the index of " + o +" is "+ list.indexOf(o);
                     }
                 })
-                .subscribe(new Consumer<Object>() {
+                .subscribe(new Consumer<String>() {
                     @Override
-                    public void accept(@NonNull Object o) throws Exception {
+                    public void accept(@NonNull String o) throws Exception {
                         Toast.makeText(FiveActivity.this, "toast: " + o, Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -172,7 +172,7 @@ public class FiveActivity extends BaseActivity {
         Observable.just(userList)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .compose(bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .compose(this.<List<User>>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
                 .doOnSubscribe(new Consumer<Disposable>() {
                     @Override
                     public void accept(@NonNull Disposable disposable) throws Exception {
@@ -180,16 +180,16 @@ public class FiveActivity extends BaseActivity {
                     }
                 })
                 .ofType(User.class)
-                .filter(new Predicate<Object>() {
+                .filter(new Predicate<User>() {
                     @Override
-                    public boolean test(@NonNull Object o) throws Exception {
-                        return ((User)o).getName().equals("Kobe");
+                    public boolean test(@NonNull User o) throws Exception {
+                        return (o).getName().equals("Kobe");
                     }
                 })
-                .subscribe(new Consumer<Object>() {
+                .subscribe(new Consumer<User>() {
                     @Override
-                    public void accept(@NonNull Object o) throws Exception {
-                        Log.d("MainActivity", "index: " + o.toString());
+                    public void accept(@NonNull User user) throws Exception {
+                        Log.d("MainActivity", "index: " + user.getName());
                     }
                 });
 
@@ -197,7 +197,7 @@ public class FiveActivity extends BaseActivity {
         Observable.fromArray(nbaArray)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .compose(bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .compose(this.<String>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
                 .doOnSubscribe(new Consumer<Disposable>() {
                     @Override
                     public void accept(@NonNull Disposable disposable) throws Exception {
@@ -205,11 +205,11 @@ public class FiveActivity extends BaseActivity {
                     }
                 })
                 /*.first(0)*/
-                .last(nbaArray.length-1)
-                .subscribe(new Consumer<Object>() {
+                .last(nbaArray[nbaArray.length-1])
+                .subscribe(new Consumer<String>() {
                     @Override
-                    public void accept(@NonNull Object o) throws Exception {
-
+                    public void accept(@NonNull String s) throws Exception {
+                        //
                     }
                 });
 

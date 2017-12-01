@@ -79,11 +79,10 @@ public class SixActivity extends BaseActivity {
                         addDisposable(disposable);
                     }
                 })
-                .compose(bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
-                .subscribe(new Consumer<Object>() {
+                .compose(this.<UserEvent>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .subscribe(new Consumer<UserEvent>() {
                     @Override
-                    public void accept(@NonNull Object o) throws Exception {
-                        UserEvent userEvent = (UserEvent) o;
+                    public void accept(@NonNull UserEvent userEvent) throws Exception {
                         nbaArray = userEvent.getArray();
                     }
                 });
@@ -101,15 +100,22 @@ public class SixActivity extends BaseActivity {
 
                         return !TextUtils.isEmpty(charSequence) && !TextUtils.isEmpty(charSequence2) && !TextUtils.isEmpty(charSequence3) && !TextUtils.isEmpty(charSequence4);
                     }
-                }).subscribe(new Consumer<Boolean>() {
-            @Override
-            public void accept(@NonNull Boolean aBoolean) throws Exception {
-                if (aBoolean) {
-                    //
-
-                }
-            }
-        });
+                })
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .compose(this.<Boolean>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Boolean>() {
+                    @Override
+                    public void accept(@NonNull Boolean o) throws Exception {
+                        //
+                    }
+                });
 
         /**
          *  join
@@ -126,17 +132,27 @@ public class SixActivity extends BaseActivity {
             public ObservableSource<String> apply(@NonNull CharSequence charSequence) throws Exception {
                 return Observable.just(charSequence.toString());
             }
-        }, new BiFunction<CharSequence, CharSequence, Object>() {
+        }, new BiFunction<CharSequence, CharSequence, String>() {
             @Override
-            public Object apply(@NonNull CharSequence charSequence, @NonNull CharSequence charSequence2) throws Exception {
+            public String apply(@NonNull CharSequence charSequence, @NonNull CharSequence charSequence2) throws Exception {
                 return charSequence + "-" + charSequence2;
             }
-        }).subscribe(new Consumer<Object>() {
-            @Override
-            public void accept(@NonNull Object o) throws Exception {
-                RxTextView.text(editText8).accept(o.toString());
-            }
-        });
+        })
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .compose(this.<String>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<String>() {
+                    @Override
+                    public void accept(@NonNull String o) throws Exception {
+                        RxTextView.text(editText8).accept(o);
+                    }
+                });
 
         /**
          *  merge mergeWith mergeDelayError
@@ -151,15 +167,15 @@ public class SixActivity extends BaseActivity {
         list.add(RxView.clicks(editText6));
         list.add(RxView.clicks(editText7));
         Observable.merge(list)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(new Consumer<Disposable>() {
                     @Override
                     public void accept(@NonNull Disposable disposable) throws Exception {
                         addDisposable(disposable);
                     }
                 })
-                .compose(bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .compose(this.bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Object>() {
                     @Override
                     public void accept(@NonNull Object o) throws Exception {
@@ -182,10 +198,10 @@ public class SixActivity extends BaseActivity {
                         addDisposable(disposable);
                     }
                 })
-                .compose(bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
-                .subscribe(new Consumer<Object>() {
+                .compose(this.<String>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .subscribe(new Consumer<String>() {
                     @Override
-                    public void accept(@NonNull Object o) throws Exception {
+                    public void accept(@NonNull String o) throws Exception {
                         Log.d("SixActivity", "startWith: " + o.toString());
                     }
                 });
@@ -205,12 +221,22 @@ public class SixActivity extends BaseActivity {
                 e.onNext(Observable.just("where amazing happens"));
                 e.onComplete();
             }
-        })).subscribe(new Consumer<Object>() {
-            @Override
-            public void accept(@NonNull Object o) throws Exception {
-                Log.d("SixActivity", "switchOnNext:" + o.toString());
-            }
-        });
+        }))
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .compose(this.<String>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<String>() {
+                    @Override
+                    public void accept(@NonNull String o) throws Exception {
+                        Log.d("SixActivity", "switchOnNext:" + o.toString());
+                    }
+                });
 
         /**
          *  zip
@@ -224,35 +250,36 @@ public class SixActivity extends BaseActivity {
             public Boolean apply(@NonNull String s, @NonNull Integer integer) throws Exception {
                 return Arrays.asList(nbaArray).indexOf(s) == integer;
             }
-        }).subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .doOnSubscribe(new Consumer<Disposable>() {
-              @Override
-              public void accept(@NonNull Disposable disposable) throws Exception {
-                  addDisposable(disposable);
-              }
-          })
-          .compose(bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
-          .flatMap(new Function<Object, ObservableSource<String>>() {
-              @Override
-              public ObservableSource<String> apply(@NonNull Object aBoolean) throws Exception {
-                  boolean flag = (boolean) aBoolean;
-                  if(flag){
-                      return Observable.just("compare success");
-                  }
-                  return Observable.error(new Throwable("compare fail"));
-              }
-          }).subscribe(new MyObserver<String>() {
-              @Override
-              public void onNext(@NonNull String s) {
-                  Log.d("SixActivity", "zip:" + s);
-              }
+        })
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .compose(this.<Boolean>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .flatMap(new Function<Boolean, ObservableSource<String>>() {
+                    @Override
+                    public ObservableSource<String> apply(@NonNull Boolean aBoolean) throws Exception {
+                        if (aBoolean) {
+                            return Observable.just("compare success");
+                        }
+                        return Observable.error(new Throwable("compare fail"));
+                    }
+                })
+                .subscribe(new MyObserver<String>() {
+                    @Override
+                    public void onNext(@NonNull String s) {
+                        Log.d("SixActivity", "zip:" + s);
+                    }
 
-            @Override
-            public void onError(@NonNull Throwable e) {
-                Log.d("SixActivity", "zip-error:" + e.getMessage());
-            }
-        });
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Log.d("SixActivity", "zip-error:" + e.getMessage());
+                    }
+                });
 
         //
         RxView.clicks(button3).subscribe(new Consumer<Object>() {

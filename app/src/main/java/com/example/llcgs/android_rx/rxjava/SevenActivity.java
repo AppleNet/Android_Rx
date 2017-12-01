@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.example.llcgs.android_rx.R;
 import com.example.llcgs.android_rx.rxbinding.MyObserver;
+import com.example.llcgs.android_rx.rxlifecycle.ActivityLifeCycleEvent;
 import com.example.llcgs.android_rx.rxlifecycle.BaseActivity;
 
 import io.reactivex.Observable;
@@ -13,6 +14,8 @@ import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
@@ -62,24 +65,32 @@ public class SevenActivity extends BaseActivity {
                 //throwable.printStackTrace();
                 return 10;
             }
-        }).subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(new MyObserver<Integer>() {
-            @Override
-            public void onNext(@NonNull Integer integer) {
-                Log.d(TAG, "onErrorReturn_onNext:" + "" + integer);
-            }
+        })
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .compose(this.<Integer>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyObserver<Integer>() {
+                    @Override
+                    public void onNext(@NonNull Integer integer) {
+                        Log.d(TAG, "onErrorReturn_onNext:" + "" + integer);
+                    }
 
-            @Override
-            public void onError(@NonNull Throwable e) {
-                Log.d(TAG, "onErrorReturn_onError" + e.getMessage());
-            }
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Log.d(TAG, "onErrorReturn_onError" + e.getMessage());
+                    }
 
-            @Override
-            public void onComplete() {
-                Log.d(TAG, "onErrorReturn_Complete");
-            }
-        });
+                    @Override
+                    public void onComplete() {
+                        Log.d(TAG, "onErrorReturn_Complete");
+                    }
+                });
 
         /**
          * onErrorResumeNext(Observable) 让Observable在遇到错误时开始发射第二个Observable的数据序列

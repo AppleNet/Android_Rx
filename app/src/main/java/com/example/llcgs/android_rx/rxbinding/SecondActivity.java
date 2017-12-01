@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.example.llcgs.android_rx.R;
+import com.example.llcgs.android_rx.rxlifecycle.ActivityLifeCycleEvent;
 import com.example.llcgs.android_rx.rxlifecycle.BaseActivity;
 import com.example.llcgs.android_rx.rxbus.RxBus;
 import com.example.llcgs.android_rx.rxbus.event.UserEvent;
@@ -26,6 +27,8 @@ import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -71,10 +74,17 @@ public class SecondActivity extends BaseActivity implements ViewSwitcher.ViewFac
         next(null);
         Observable.interval(1, TimeUnit.SECONDS)
                 .take(array.length)
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@io.reactivex.annotations.NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
                 // 订阅
                 .subscribeOn(Schedulers.io())
                 // 观察
                 .observeOn(AndroidSchedulers.mainThread())
+                .compose(this.<Long>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
                 .subscribe(new MyObserver<Long>() {
                     @Override
                     public void onNext(@NonNull Long aLong) {

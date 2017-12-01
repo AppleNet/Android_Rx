@@ -95,15 +95,15 @@ public class FourActivity extends BaseActivity {
                         addDisposable(disposable);
                     }
                 })
-                .compose(bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
-                .map(new Function<Object, Object>() {
+                .compose(this.<String[]>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .map(new Function<String[], String>() {
                     @Override
-                    public Object apply(@NonNull Object o) throws Exception {
-                        return o;
+                    public String apply(@NonNull String[] o) throws Exception {
+                        return o[1];
                     }
-                }).subscribe(new Consumer<Object>() {
+                }).subscribe(new Consumer<String>() {
                     @Override
-                    public void accept(@NonNull Object o) throws Exception {
+                    public void accept(@NonNull String o) throws Exception {
 
                     }
             });
@@ -112,17 +112,17 @@ public class FourActivity extends BaseActivity {
         Observable.fromArray(nbaArray)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .compose(bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
                 .doOnSubscribe(new Consumer<Disposable>() {
                     @Override
                     public void accept(@NonNull Disposable disposable) throws Exception {
                         addDisposable(disposable);
                     }
                 })
-                .map(new Function<Object, String>() {
+                .compose(this.<String>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .map(new Function<String, String>() {
                     @Override
-                    public String apply(@NonNull Object s) throws Exception {
-                        return s + ", age:" + ageArray[Arrays.asList(nbaArray).indexOf(s)];
+                    public String apply(@NonNull String strings) throws Exception {
+                        return strings + ", age:" + ageArray[Arrays.asList(nbaArray).indexOf(strings)];
                     }
                 })
                 .subscribe(new Consumer<String>() {
@@ -150,22 +150,21 @@ public class FourActivity extends BaseActivity {
          *
          * */
         Observable.fromArray(nbaArray)
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .compose(this.<String>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .flatMap(new Function<String, ObservableSource<String>>() {
                     @Override
-                    public ObservableSource<String> apply(@NonNull final String s) throws Exception {
-
-                        return /*Observable.create(new ObservableOnSubscribe<String>() {
-                            @Override
-                            public void subscribe(@NonNull ObservableEmitter<String> e) throws Exception {
-                                e.onNext("flatMap: "+s + ", age:" + ageArray[Arrays.asList(nbaArray).indexOf(s)]);
-                                e.onComplete();
-                            }
-                        }).subscribeOn(Schedulers.io());*/
-                                Observable.just("flatMap: " + s + ", age:" + ageArray[Arrays.asList(nbaArray).indexOf(s)]);
+                    public ObservableSource<String> apply(@NonNull String s) throws Exception {
+                        return Observable.just("flatMap: " + s + ", age:" + ageArray[Arrays.asList(nbaArray).indexOf(s)]);
                     }
-                }, true)
+                })
                 .subscribe(new Consumer<String>() {
                     @Override
                     public void accept(@NonNull String s) throws Exception {
@@ -181,8 +180,15 @@ public class FourActivity extends BaseActivity {
          *
          * */
         Observable.fromArray(nbaArray)
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .compose(this.<String>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
                 .concatMap(new Function<String, ObservableSource<String>>() {
                     @Override
                     public ObservableSource<String> apply(@NonNull String s) throws Exception {
@@ -203,6 +209,13 @@ public class FourActivity extends BaseActivity {
          *
          * */
         Observable.fromArray(nbaArray)
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .compose(this.<String>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .switchMap(new Function<String, ObservableSource<String>>() {
@@ -224,6 +237,13 @@ public class FourActivity extends BaseActivity {
          *  它返回Observable的一个特殊子类 GroupedObservable  ，实现了 GroupedObservable  接口的对象有一个额外的方法 getKey  ，这个Key用于将数据分组到指定的Observable
          * */
         Observable.fromArray(nbaArray)
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .compose(this.<String>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .groupBy(new Function<String, String>() {
@@ -244,24 +264,32 @@ public class FourActivity extends BaseActivity {
          * scan
          *  Scan  操作符对原始Observable发射的第一项数据应用一个函数，然后将那个函数的结果作为自己的第一项数据发射。它将函数的结果同第二项数据一起填充给这个函数来产生它自己的第二项数据
          * */
-        Observable.fromArray(nbaArray)
+        Disposable disposable = Observable.fromArray(nbaArray)
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .compose(this.<String>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .scan(new BiFunction<String, String, String>() {
                     @Override
                     public String apply(@NonNull String s, @NonNull String s2) throws Exception {
                         Log.d("MainActivity", "s:" + s + ", s2:" + s2);
-
                         return /*"scan:" + s + ", age:" + ageArray[Arrays.asList(nbaArray).indexOf(s)] + ", s2:"+s2*/ "scan:" + s + s2;
                     }
                 })
                 .subscribe(new Consumer<String>() {
                     @Override
                     public void accept(@NonNull String s) throws Exception {
-                        list.add(s);
+                        list.add((String) s);
                         adapter.setNewData(list);
                     }
                 });
 
+        disposable.dispose();
     }
+
 }

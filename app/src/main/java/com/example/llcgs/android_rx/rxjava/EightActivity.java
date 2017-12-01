@@ -12,7 +12,6 @@ import com.example.llcgs.android_rx.rxlifecycle.BaseActivity;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,28 +36,27 @@ import io.reactivex.schedulers.Timed;
  *
  * @author liulongchao
  * @since 2017/6/20
- *
- *  RxJava操作符--辅助操作
- *  1.Delay
- *  2.DO
- *  3.Materialize/Dematerialize
- *  4.ObserverOn
- *  5.Serialize
- *  6.Subscribe
- *  7.SubscribeOn
- *  8.TimeInterval
- *  9.Timeout
- *  10.Timestamp
- *  11.Using
- *  12.To
- *
+ * <p>
+ * RxJava操作符--辅助操作
+ * 1.Delay
+ * 2.DO
+ * 3.Materialize/Dematerialize
+ * 4.ObserverOn
+ * 5.Serialize
+ * 6.Subscribe
+ * 7.SubscribeOn
+ * 8.TimeInterval
+ * 9.Timeout
+ * 10.Timestamp
+ * 11.Using
+ * 12.To
  */
 public class EightActivity extends BaseActivity {
 
     private static final String TAG = EightActivity.class.getSimpleName();
 
-    private String [] nbaArray = new String[]{
-            "Jodn","Wade","James","Bosh","Kobe","McGrady","answer"
+    private String[] nbaArray = new String[]{
+            "Jodn", "Wade", "James", "Bosh", "Kobe", "McGrady", "answer"
     };
 
     @Override
@@ -76,30 +74,30 @@ public class EightActivity extends BaseActivity {
          * 然而它会平移一个onCompleted通知。
          *
          * */
-        Log.d(TAG, "currentTime:"+System.currentTimeMillis());
-        Observable.just("Jodn","Wade","James","Bosh","Kobe","McGrady","answer")
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+        Log.d(TAG, "currentTime:" + System.currentTimeMillis());
+        Observable.just("Jordon", "Wade", "James", "Bosh", "Kobe", "McGrady", "answer")
                 .doOnSubscribe(new Consumer<Disposable>() {
                     @Override
                     public void accept(@NonNull Disposable disposable) throws Exception {
                         addDisposable(disposable);
                     }
                 })
-                .compose(bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .compose(this.<String>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
                 // 延迟两秒发射
                 .delay(2, TimeUnit.SECONDS)
-                /*.flatMap(new Function<Object, ObservableSource<Object>>() {
+                .flatMap(new Function<String, ObservableSource<String>>() {
                     @Override
-                    public ObservableSource<Object> apply(@NonNull Object o) throws Exception {
+                    public ObservableSource<String> apply(@NonNull String o) throws Exception {
                         return Observable.just(o);
                     }
-                })*/
-                .subscribe(new Consumer<Object>() {
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<String>() {
                     @Override
-                    public void accept(@NonNull Object o) throws Exception {
-                        Log.d(TAG, "currentTime:"+System.currentTimeMillis());
-                        Log.d(TAG, "nba star："+o.toString());
+                    public void accept(@NonNull String o) throws Exception {
+                        Log.d(TAG, "currentTime:" + System.currentTimeMillis());
+                        Log.d(TAG, "nba star：" + o);
                     }
                 });
 
@@ -118,20 +116,22 @@ public class EightActivity extends BaseActivity {
          *
          * */
         Observable.fromArray(nbaArray)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
                 // 当观察者取消订阅Observable时就会被调用；Observable通过onError或者onCompleted结束时，会反订阅所有的Subscriber
                 .doOnSubscribe(new Consumer<Disposable>() {
                     @Override
                     public void accept(@NonNull Disposable disposable) throws Exception {
                         addDisposable(disposable);
                     }
-                }).subscribe(new Consumer<String>() {
-            @Override
-            public void accept(@NonNull String s) throws Exception {
-                Log.d(TAG, "nba star:doOnSubscribe-"+s);
-            }
-        });
+                })
+                .compose(this.<String>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<String>() {
+                    @Override
+                    public void accept(@NonNull String o) throws Exception {
+                        Log.d(TAG, "nba star:doOnSubscribe-" + o);
+                    }
+                });
 
         /**
          * Materialize/Dematerialize 感觉没什么卵用
@@ -144,12 +144,23 @@ public class EightActivity extends BaseActivity {
                 e.onNext("where amazing happens");
                 e.onComplete();
             }
-        }).materialize().subscribe(new Consumer<Notification<String>>() {
-            @Override
-            public void accept(@NonNull Notification<String> stringNotification) throws Exception {
-                Log.d(TAG, "座右铭："+stringNotification.getValue());
-            }
-        });
+        })
+                .materialize()
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .compose(this.<Notification<String>>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Notification<String>>() {
+                    @Override
+                    public void accept(@NonNull Notification<String> stringNotification) throws Exception {
+                        Log.d(TAG, "座右铭：" + ((Notification) stringNotification).getValue());
+                    }
+                });
 
         /**
          * Serialize
@@ -165,24 +176,46 @@ public class EightActivity extends BaseActivity {
                 e.onNext("happens");
                 e.onComplete();
             }
-            // 同步执行？？？？
-        }).serialize().subscribe(new Consumer<String>() {
-            @Override
-            public void accept(@NonNull String s) throws Exception {
-                Log.d(TAG, "s:" + s);
-            }
-        });
+
+        })      // 同步执行？？？？
+                .serialize()
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .compose(this.<String>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<String>() {
+                    @Override
+                    public void accept(@NonNull String s) throws Exception {
+                        Log.d(TAG, "s:" + s);
+                    }
+                });
 
         /**
          * TimeInterval
          *  将一个发射数据的Observable转换为发射那些数据发射时间间隔的Observable
          * */
-        Observable.fromArray(nbaArray).timeInterval().subscribe(new Consumer<Timed<String>>() {
-            @Override
-            public void accept(@NonNull Timed<String> stringTimed) throws Exception {
-                Log.d(TAG, "value: " + stringTimed.value()+ ", time: "+stringTimed.time() + ", unit: "+stringTimed.unit());
-            }
-        });
+        Observable.fromArray(nbaArray)
+                .timeInterval()
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .compose(this.<Timed<String>>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Timed<String>>() {
+                    @Override
+                    public void accept(@NonNull Timed<String> stringTimed) throws Exception {
+                        Log.d(TAG, "value: " + stringTimed.value() + ", time: " + stringTimed.time() + ", unit: " + stringTimed.unit());
+                    }
+                });
 
         /**
          * Timeout
@@ -196,18 +229,29 @@ public class EightActivity extends BaseActivity {
                 e.onNext("paly baseketball");
                 e.onComplete();
             }
-            // 休眠了四秒 再发射paly baseketball timeout限制的是3秒 所以 onError发射通知结束
-        }).timeout(3, TimeUnit.SECONDS).subscribe(new MyObserver<String>() {
-            @Override
-            public void onNext(@NonNull String s) {
-                Log.d(TAG, "s: " +s);
-            }
 
-            @Override
-            public void onError(@NonNull Throwable e) {
-                e.printStackTrace();
-            }
-        });
+        })      // 休眠了四秒 再发射paly baseketball timeout限制的是3秒 所以 onError发射通知结束
+                .timeout(3, TimeUnit.SECONDS)
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .compose(this.<String>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new MyObserver<String>() {
+                    @Override
+                    public void onNext(@NonNull String s) {
+                        Log.d(TAG, "s: " + s);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        e.printStackTrace();
+                    }
+                });
 
         /**
          * Timestamp
@@ -215,19 +259,26 @@ public class EightActivity extends BaseActivity {
          * */
         Observable.fromIterable(Arrays.asList(nbaArray))
                 .timestamp()
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .compose(this.<Timed<String>>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Timed<String>>() {
                     @Override
                     public void accept(@NonNull Timed<String> stringTimed) throws Exception {
-                        Log.d(TAG, "timestamp():"+"value: " + stringTimed.value()+ ", time: "+stringTimed.time() + ", unit: "+stringTimed.unit());
+                        Log.d(TAG, "timestamp():" + "value: " + stringTimed.value() + ", time: " + stringTimed.time() + ", unit: " + stringTimed.unit());
                     }
                 });
 
         /**
          * using
          *  创建一个只在Observable生命周期内存在的一次性资源
-         *
          *   before using被 use using冲掉了
-         *
          * */
         Observable.create(new ObservableOnSubscribe<String>() {
             @Override
@@ -266,38 +317,44 @@ public class EightActivity extends BaseActivity {
         Observable.fromArray(nbaArray)
                 // 将数组转换成List
                 .toList()
-                .observeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
                 .map(new Function<List<String>, Map<Integer, String>>() {
                     @Override
                     public Map<Integer, String> apply(@NonNull List<String> strings) throws Exception {
                         Map<Integer, String> items = new HashMap<>();
-                        for (String s : strings){
+                        for (String s : strings) {
                             items.put(Arrays.asList(nbaArray).indexOf(s), "NBA All-Star:" + s);
                         }
                         return items;
                     }
-                }).subscribe(new Consumer<Map<Integer, String>>() {
-            @Override
-            public void accept(@NonNull Map<Integer, String> integerStringMap) throws Exception {
+                })
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .compose(this.<Map<Integer, String>>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Map<Integer, String>>() {
+                    @Override
+                    public void accept(@NonNull Map<Integer, String> integerStringMap) throws Exception {
 
-                Set<Integer> integers = integerStringMap.keySet();
-                for (Integer integer : integers){
-                    Log.d(TAG, "toList-integerStringMap.keySet(): "+ integerStringMap.get(integer));
-                }
+                        Set<Integer> integers = integerStringMap.keySet();
+                        for (Integer integer : integers) {
+                            Log.d(TAG, "toList-integerStringMap.keySet(): " + integerStringMap.get(integer));
+                        }
 
-                Set<Map.Entry<Integer, String>> entries = integerStringMap.entrySet();
-                Iterator<Map.Entry<Integer, String>> iterator = entries.iterator();
-                while (iterator.hasNext()){
-                    Map.Entry<Integer, String> next = iterator.next();
-                    Log.d(TAG, "toList-integerStringMap.entrySet(): " + next.getKey()+ "," + next.getValue());
-                }
+                        Set<Map.Entry<Integer, String>> entries = integerStringMap.entrySet();
+                        for (Map.Entry<Integer, String> next : entries) {
+                            Log.d(TAG, "toList-integerStringMap.entrySet(): " + next.getKey() + "," + next.getValue());
+                        }
 
-                for (String s : integerStringMap.values()){
-                    Log.d(TAG, "toList: " + s);
-                }
-            }
-        });
+                        for (String s : integerStringMap.values()) {
+                            Log.d(TAG, "toList: " + s);
+                        }
+                    }
+                });
 
         /**
          * to
@@ -321,19 +378,26 @@ public class EightActivity extends BaseActivity {
                 }, /**生成value函数*/new Function<String, String>() {
                     @Override
                     public String apply(@NonNull String s) throws Exception {
-                        return "NBA All-Star: "+s;
+                        return "NBA All-Star: " + s;
+                    }
+                })
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
                     }
                 })
                 .subscribeOn(Schedulers.io())
+                .compose(this.<Map<Integer, String>>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Map<Integer, String>>() {
-            @Override
-            public void accept(@NonNull Map<Integer, String> integerStringMap) throws Exception {
-                for (String s : integerStringMap.values()){
-                    Log.d(TAG, "toList: " + s);
-                }
-            }
-        });
+                    @Override
+                    public void accept(@NonNull Map<Integer, String> integerStringMap) throws Exception {
+                        for (String s : integerStringMap.values()) {
+                            Log.d(TAG, "toList: " + s);
+                        }
+                    }
+                });
 
         /**
          * to
@@ -360,12 +424,22 @@ public class EightActivity extends BaseActivity {
                     public Collection<? super String> apply(@NonNull Integer integer) throws Exception {
                         return null;
                     }
-                }).subscribe(new Consumer<Map<Integer, Collection<String>>>() {
-            @Override
-            public void accept(@NonNull Map<Integer, Collection<String>> integerCollectionMap) throws Exception {
-
-            }
-        });
+                })
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(@NonNull Disposable disposable) throws Exception {
+                        addDisposable(disposable);
+                    }
+                })
+                .compose(this.<Map<Integer, Collection<String>>>bindUntilEvent(ActivityLifeCycleEvent.DESTROY))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Map<Integer, Collection<String>>>() {
+                    @Override
+                    public void accept(@NonNull Map<Integer, Collection<String>> integerCollectionMap) throws Exception {
+                        // key int value collection
+                    }
+                });
 
     }
 }
